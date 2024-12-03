@@ -1,0 +1,11 @@
+[package]
+name = "arcanum"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+argon2 = { version = "0.5.3", features = ["password-hash"] }
+clap = { version = "4.5.21", features = ["derive"] }
+dirs-next = "2.0.0"
+rand = "0.8.5"
+rpassword = "7.3.1"
