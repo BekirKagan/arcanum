@@ -1,71 +1,70 @@
-use argon2::{
-    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, SaltString},
-    Argon2,
+mod args;
+use args::ArcanumCommands;
+
+use dirs_next::{data_dir, data_local_dir};
+use std::{
+    fs::File,
+    io::Write,
+    path::{Path, PathBuf},
 };
-use clap::{Parser, Subcommand};
-use rpassword;
 
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
-struct ArcanumArgs {
-    #[command(subcommand)]
-    command: Option<ArcanumCommands>,
-}
+use rpassword::prompt_password;
 
-#[derive(Subcommand)]
-enum ArcanumCommands {
-    /// Initialize the password manager and create a master password.
-    Init,
+use argon2::{
+    password_hash::{rand_core::OsRng, SaltString},
+    Argon2, PasswordHash, PasswordHasher,
+};
 
-    /// Add a new credential.
-    Add,
+const DATA_FILENAME: &str = "arcanum.data";
 
-    ///  List all saved credentials (show only names/descriptions).
-    List,
-
-    /// Retrieve a specific credential (prompts for master password).
-    Get {
-        #[arg(short, long)]
-        name: String,
-    },
-
-    /// Update an existing credential.
-    Edit {
-        #[arg(short, long)]
-        name: String,
-    },
-
-    /// Delete a credential.
-    Delete {
-        #[arg(short, long)]
-        name: String,
-    },
-
-    /// Generate a secure password.
-    Generate,
-
-    /// Export credentials to an encrypted file.
-    Export {
-        #[arg(short, long)]
-        file: String,
-    },
-
-    /// Import credentials from an encrypted file.
-    Import {
-        #[arg(short, long)]
-        file: String,
-    },
-
-    /// Manually lock the application.
-    Lock,
+fn get_data_filepath() -> PathBuf {
+    let data_dir = data_local_dir().unwrap_or(data_dir().expect("Failed to get data directory."));
+    let data_filepath = Path::join(&data_dir, DATA_FILENAME);
+    data_filepath
 }
 
 fn main() {
-    let args = ArcanumArgs::parse();
-    let command = args.command.expect("Something went wrong!");
+    let command = args::parse_command();
 
     match command {
-        ArcanumCommands::Init => {}
+        ArcanumCommands::Init => {
+            let filepath = get_data_filepath();
+
+            match File::create_new(&filepath) {
+                Ok(mut file) => {
+                    let password = prompt_password("Enter master password:")
+                        .expect("Failed to get master password.");
+
+                    let salt = SaltString::generate(&mut OsRng);
+                    let arg2 = Argon2::default();
+
+                    let hash_string = arg2
+                        .hash_password(password.as_bytes(), &salt)
+                        .expect("Failed to hash master password.")
+                        .to_string();
+
+                    let hash = PasswordHash::new(&hash_string)
+                        .expect("Failed to generate hash.")
+                        .to_string();
+
+                    file.write_all(hash.as_bytes())
+                        .expect("Failed to save hash.");
+
+                    println!("Successfully initialized.");
+                }
+
+                Err(error) => {
+                    if error.kind() == std::io::ErrorKind::AlreadyExists {
+                        println!("Already initialized!");
+                    } else {
+                        println!(
+                            "Failed to create data file in directory: {}",
+                            filepath.to_str().unwrap()
+                        );
+                    }
+                }
+            }
+        }
 
         ArcanumCommands::Add => {}
 
