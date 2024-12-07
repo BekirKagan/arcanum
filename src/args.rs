@@ -11,7 +11,10 @@ struct ArcanumArgs {
 #[derive(Subcommand)]
 pub enum ArcanumCommands {
     /// Initialize the password manager and create a master password.
-    Init,
+    Init {
+        #[arg(short, long)]
+        force: bool,
+    },
 
     /// Add a new credential.
     Add,

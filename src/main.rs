@@ -72,7 +72,11 @@ fn main() {
 
     #[allow(unused_variables)]
     match command {
-        ArcanumCommands::Init => {
+        ArcanumCommands::Init { force } => {
+            if force {
+                std::fs::remove_file(get_data_filepath()).expect("Failed to force initialize.");
+            }
+
             if should_initialize() {
                 initialize_vault();
             } else {
