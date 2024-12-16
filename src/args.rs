@@ -11,13 +11,13 @@ struct ArcanumArgs {
 #[derive(Subcommand)]
 pub enum ArcanumCommands {
     /// Initialize the password manager and create a master password.
-    Init {
-        #[arg(short, long)]
-        force: bool,
-    },
+    Init,
 
     /// Add a new credential.
-    Add,
+    Add {
+        #[arg(short, long)]
+        name: String,
+    },
 
     ///  List all saved credentials (show only names/descriptions).
     List,
@@ -57,6 +57,9 @@ pub enum ArcanumCommands {
 
     /// Manually lock the application.
     Lock,
+
+    /// Reset the vault.
+    Reset,
 }
 
 pub fn parse_command() -> ArcanumCommands {
