@@ -1,0 +1,23 @@
+[package]
+name = "arcanum"
+version = "1.0.0"
+authors = ["Bekir Kağan Karaahmetoğlu <kagankaraahmetoglu@hotmail.com>"]
+edition = "2021"
+description = "Arcanum is a secure, offline, command-line password manager designed for simplicity and efficiency."
+# documentation = ""
+readme = "README.md"
+homepage = "http://arcanum-website.infy.uk/pages/index.html"
+# repository = "https://github.com/BekirKagan/arcanum.git"
+license-file = "LICENSE"
+keywords = ["cli", "encryption", "offline", "password", "secure"]
+categories = ["authentication", "command-line-interface", "cryptography", "encoding"]
+
+[dependencies]
+anyhow = "1.0.95"
+argon2 = "0.5.3"
+clap = { version = "4.5.26", features = ["derive"] }
+dirs-next = "2.0.0"
+inquire = "0.7.5"
+rand = "0.8.5"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.135"
