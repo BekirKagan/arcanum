@@ -13,6 +13,15 @@ pub struct MasterKey {
 
 pub fn get_master_password() -> Result<String> {
     let master_password = prompt_secret("Enter master password")?;
+
+    Ok(master_password)
+}
+
+fn get_master_password_no_confirm() -> Result<String> {
+    let master_password = inquire::Password::new("Enter master password")
+        .without_confirmation()
+        .prompt()?;
+
     Ok(master_password)
 }
 
@@ -41,7 +50,7 @@ pub fn generate_master_key(master_password: String, salt: Option<String>) -> Res
 pub fn is_authorized() -> Result<bool> {
     let vault = get_vault()?;
 
-    let master_password = get_master_password()?;
+    let master_password = get_master_password_no_confirm()?;
     let master_key = generate_master_key(master_password, Some(vault.salt))?;
 
     Ok(master_key.hash == vault.hash)

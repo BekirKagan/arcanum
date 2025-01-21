@@ -25,9 +25,9 @@ pub struct Vault {
 
 #[derive(Serialize, Deserialize)]
 pub struct Credential {
-    url: String,
-    name: String,
-    password: String,
+    pub url: String,
+    pub name: String,
+    pub password: String,
 }
 
 pub fn vault_exists() -> Result<bool> {
@@ -115,6 +115,12 @@ pub fn vault_remove_credential(credential_name: String) -> Result<()> {
     fs::write(vault_path, vault_json.to_string())?;
 
     Ok(())
+}
+
+pub fn vault_get_credentials() -> Result<Vec<Credential>> {
+    let vault = get_vault()?;
+
+    Ok(vault.credentials)
 }
 
 pub fn vault_reset() -> Result<()> {

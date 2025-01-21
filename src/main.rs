@@ -5,13 +5,24 @@ mod data;
 
 use anyhow::anyhow;
 use anyhow::Result;
+use args::Command;
 
 fn main() -> Result<()> {
     let initialized = data::vault_exists()?;
     let command = args::get_command();
 
+    if command != Command::Init {
+        if !initialized {
+            return Err(anyhow!("Arcanum is not initialized."));
+        }
+
+        if !auth::is_authorized()? {
+            return Err(anyhow!("Permission denied."));
+        }
+    }
+
     match command {
-        args::Command::Init => {
+        Command::Init => {
             if initialized {
                 return Err(anyhow!("Arcanum is already initialized."));
             }
@@ -24,41 +35,35 @@ fn main() -> Result<()> {
             println!("Arcanum is initialized successfully.");
         }
 
-        args::Command::Add => {
-            if !initialized {
-                return Err(anyhow!("Arcanum is not initialized."));
-            }
-
-            if !auth::is_authorized()? {
-                return Err(anyhow!("Permission denied."));
-            }
-
+        Command::Add => {
             let credential = data::get_credential()?;
             data::vault_add_credential(credential)?;
+
+            println!("Added credential successfully.");
         }
 
-        args::Command::Remove => {
-            if !initialized {
-                return Err(anyhow!("Arcanum is not initialized."));
-            }
-
-            if !auth::is_authorized()? {
-                return Err(anyhow!("Permission denied."));
-            }
-
+        Command::Remove => {
             let credential_name = data::get_credential_name()?;
             data::vault_remove_credential(credential_name)?;
+
+            println!("Removed credential successfully.");
         }
 
-        args::Command::Reset => {
-            if !initialized {
-                return Err(anyhow!("Arcanum is not initialized."));
-            }
+        Command::List => {
+            let credentials = data::vault_get_credentials()?;
 
-            if !auth::is_authorized()? {
-                return Err(anyhow!("Permission denied."));
+            if credentials.is_empty() {
+                println!("There are no credentials in the vault.");
+            } else {
+                for credential in credentials {
+                    println!("{}", "-".repeat(50));
+                    println!("({}) {}", credential.name, credential.url,);
+                    println!("{}", "-".repeat(50));
+                }
             }
+        }
 
+        Command::Reset => {
             data::vault_reset()?;
 
             println!("Arcanum is resetted successfully.");

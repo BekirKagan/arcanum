@@ -9,7 +9,7 @@ pub struct Args {
     command: Command,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, PartialEq)]
 pub enum Command {
     /// Initialize the password manager and create a master password.
     Init,
@@ -19,6 +19,9 @@ pub enum Command {
 
     /// Remove credential.
     Remove,
+
+    /// List all the credentials.
+    List,
 
     /// Reset the password manager and delete the vault irreversibly.
     Reset,
