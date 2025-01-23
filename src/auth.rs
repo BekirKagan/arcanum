@@ -1,4 +1,3 @@
-use crate::data::get_vault;
 use anyhow::Result;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::PasswordHasher;
@@ -47,11 +46,9 @@ pub fn generate_master_key(master_password: String, salt: Option<String>) -> Res
     Ok(master_key)
 }
 
-pub fn is_authorized() -> Result<bool> {
-    let vault = get_vault()?;
-
+pub fn is_authorized(input: MasterKey) -> Result<bool> {
     let master_password = get_master_password_no_confirm()?;
-    let master_key = generate_master_key(master_password, Some(vault.salt))?;
+    let master_key = generate_master_key(master_password, Some(input.salt))?;
 
-    Ok(master_key.hash == vault.hash)
+    Ok(master_key.hash == input.hash)
 }
